@@ -22,16 +22,19 @@
         <a-form-item label="电话" :labelCol="labelCol" :wrapperCol="wrapperCol">
           <a-input v-decorator="[ 'tel', validatorRules.tel]" placeholder="请输入电话"></a-input>
         </a-form-item>
-        <a-form-item label="面积" :labelCol="labelCol" :wrapperCol="wrapperCol">
-          <a-input v-decorator="[ 'area_min', validatorRules.area]" placeholder="请输入最小面积" class="price_min_width">
+        <a-form-item label="面积" :labelCol="labelCol" :wrapperCol="wrapperCol" style="margin: 0">
+          <a-form-item class="price_min_width" >
+          <a-input v-decorator="[ 'area_min', validatorRules.area]" placeholder="请输入最小面积" >
           </a-input>
+          </a-form-item>
           <span class="query-group-split-cust"></span>
-          <a-input v-decorator="[ 'area_max']" placeholder="请输入最大面积" style="width: 100%">
-           <a-select slot="addonAfter"  v-decorator="[ 'area_unit',{'initialValue':'平米'}]" class="price_max_width">
-              <a-select-option value="平米">平米</a-select-option>
-              <a-select-option value="亩">亩</a-select-option>
+          <a-form-item class="price_max_width">
+          <a-input v-decorator="[ 'area_max',validatorRules.area]" placeholder="请输入最大面积" >
+           <a-select slot="addonAfter"  v-decorator="[ 'area_unit',{'initialValue':'平米'}]"  style="width: 80px">
+              <a-select-option v-for="(unit,i) in areaUnits" :value="unit" :key="i">{{unit}}</a-select-option>
             </a-select>
           </a-input>
+          </a-form-item>
         </a-form-item>
         <a-form-item label="楼号" :labelCol="labelCol" :wrapperCol="wrapperCol">
           <a-input v-decorator="[ 'building', validatorRules.building]" placeholder="请输入楼号"></a-input>
@@ -40,19 +43,18 @@
           <a-input v-decorator="[ 'floor', validatorRules.floor]" placeholder="请输入楼层"></a-input>
         </a-form-item>
         <a-form-item label="价格" :labelCol="labelCol" :wrapperCol="wrapperCol">
-          <span>
-          <a-input v-decorator="['price_min',validatorRules.price_min]" placeholder="请输入最低价格" class="price_min_width">
+          <a-form-item class="price_min_width">
+          <a-input v-decorator="['price_min',validatorRules.price_min]" placeholder="请输入最低价格" >
             </a-input>
+          </a-form-item>
             <span class="query-group-split-cust"></span>
-          <a-input v-decorator="[ 'price_max']" placeholder="请输入最高价格" class="price_max_width" >
-            
-          
+          <a-form-item class="price_max_width">
+          <a-input v-decorator="[ 'price_max',validatorRules.price_min]" placeholder="请输入最高价格"  >
           <a-select slot="addonAfter" v-decorator="[ 'price_unit',{'initialValue':'元'}]"  style="width: 80px">
-              <a-select-option value="元">元</a-select-option>
-              <a-select-option value="万元">万元</a-select-option>
+              <a-select-option v-for="(punit,i) in priceUnits" :value="punit" :key="i">{{punit}}</a-select-option>
             </a-select>
            </a-input>
-           </span>
+          </a-form-item>
         </a-form-item>
         <a-form-item label="电压" :labelCol="labelCol" :wrapperCol="wrapperCol">
           <a-input v-decorator="[ 'voltage', validatorRules.voltage]" placeholder="请输入电压"></a-input>
@@ -82,21 +84,25 @@
 
 <script>
 
+  import fse from 'fs-extra'
   import pick from 'lodash.pick'
   import {dbUtils} from '../dbUtils'
+  import {cfgPath} from "../../../utils/settings";
 
   export default {
     name: "HouseModal",
     components: { 
       pick,
       dbUtils,
+      cfgPath,
     },
     data () {
       return {
         form: this.$form.createForm(this),
         title:"操作",
         width:800,
-     
+        areaUnits:[],
+        priceUnits:[],
         visible: false,
         model: {},
         labelCol: {
@@ -148,8 +154,13 @@
       }
     },
     created () {
+      fse.readJson(cfgPath).then(units=>{
+        this.areaUnits = units.面积单位
+        this.priceUnits = units.价格单位
+      })
     },
     methods: {
+
       add () {
         this.edit({});
       },
@@ -181,12 +192,13 @@
             console.log("表单提交数据",formData)
 
              this.$db.serialize(()=>{
+               console.log("runSql : " + runSql)
                     this.$db.run('BEGIN');
                  this.$db.run(runSql,'','',
              formData.code,formData.adress,formData.landlord,formData.tel,formData.area_min,formData.area_max,
              formData.area_unit,formData.building,formData.floor,formData.price_min,formData.price_max,
              formData.price_unit,formData.voltage,formData.remark,formData.source,formData.entrust,
-             datetime('now'),formData.sell_time,err=>{
+             dbUtils.dateToString(new Date()),formData.sell_time,err=>{
                    if(err){
                      that.$logger(err)
                        this.$db.run('ROLLBACK');
@@ -208,22 +220,28 @@
       popupCallback(row){
         this.form.setFieldsValue(pick(row,'code','adress','landlord','tel','area_min','area_max','areaUnit','building','floor','price_min','price_max','priceUnit','voltage','remark','source','entrust','sourceTime','sold','sellTime'))
       },
-      validateInputCode(rule,value,callback){
-        console.log(dbUtils.getValidateSql(value))
-        this.$db.all(dbUtils.getValidateSql(value),(err,res)=>{
-          console.log(res)
-          if (res != undefined && res.length > 0){
-            callback("编码重复！")
-          }
-        })
-      }
+       validateInputCode(rule, value, callback) {
+         this.$db.all(dbUtils.getValidateSql(value),(err,res)=>{
+            console.log(err)
+            console.log(res)
+
+           console.log(this.model.id)
+            if (res != undefined && res.length > 0 && !this.model.id ){
+              callback("编码重复！")
+            }
+            callback();
+          })
+
+
+      },
+
       
     }
   }
 </script>
 <style scoped>
-.price_min_width{width:calc(50% - 55px)!important}
-.price_max_width{width:calc(50% + 25px)!important;}
+.price_min_width{margin:0 !important;display: inline-block !important; width:calc(50% - 50px)!important}
+.price_max_width{margin:0 !important;display: inline-block !important; width:calc(50% + 30px)!important; }
 .query-group-split-cust:before{content:"~";width: 20px;display: inline-block;text-align: center}
 
 </style>

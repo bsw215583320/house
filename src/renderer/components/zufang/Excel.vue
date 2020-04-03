@@ -82,7 +82,6 @@ export default {
                 sd.信息,
                 sd.委托,
                 dbUtils.getDateByStr(sd.登记日期),
-                "0",
                 '',
                 err => {
                     ++flag;
