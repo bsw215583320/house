@@ -39,7 +39,9 @@ db.serialize(() => {
   //   )`, err => {
   //   logger(err);
   // });
-
+  /**
+   * 房源表 house
+   */
   db.run(`CREATE TABLE HOUSE  (
     id INTEGER PRIMARY KEY AUTOINCREMENT  NOT NULL,
     create_by varchar(50) ,
@@ -65,6 +67,35 @@ db.serialize(() => {
     source_time datetime ,
     sold varchar(1)  ,
     sell_time datetime  
+    )`, err => {
+    logger(err);
+  });
+  /**
+   * 客户表 CUSTOMER
+   */
+  db.run(`CREATE TABLE CUSTOMER  (
+    id INTEGER PRIMARY KEY AUTOINCREMENT  NOT NULL,
+    create_by varchar(50) ,
+    create_time datetime  ,
+    update_by varchar(50) ,
+    update_time datetime  ,
+    code varchar(32) ,
+    name varchar(64)  ,
+    business varchar(200),
+    tel varchar(32),
+    area_min DECIMAL(15,2) ,
+    area_max DECIMAL(15,2) ,
+    area_unit varchar(32) ,
+    site varchar(32)  ,
+    floor varchar(32),
+    price_min DECIMAL(15,2),
+    price_max DECIMAL(15,2),
+    price_unit varchar(32) ,
+    remark varchar(1000),
+    source varchar(32)  ,
+    source_time datetime ,
+    lose varchar(1)  ,
+    lose_time datetime  
     )`, err => {
     logger(err);
   });

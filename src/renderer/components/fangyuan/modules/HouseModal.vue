@@ -88,6 +88,7 @@
   import pick from 'lodash.pick'
   import {dbUtils} from '../dbUtils'
   import {cfgPath} from "../../../utils/settings";
+  import {getDateByStr,dateToString} from"../util/DateUtil"
 
   export default {
     name: "HouseModal",
@@ -95,6 +96,8 @@
       pick,
       dbUtils,
       cfgPath,
+      getDateByStr,
+      dateToString,
     },
     data () {
       return {
@@ -198,7 +201,7 @@
              formData.code,formData.adress,formData.landlord,formData.tel,formData.area_min,formData.area_max,
              formData.area_unit,formData.building,formData.floor,formData.price_min,formData.price_max,
              formData.price_unit,formData.voltage,formData.remark,formData.source,formData.entrust,
-             dbUtils.dateToString(new Date()),formData.sell_time,err=>{
+             dateToString(new Date()),formData.sell_time,err=>{
                    if(err){
                      that.$logger(err)
                        this.$db.run('ROLLBACK');

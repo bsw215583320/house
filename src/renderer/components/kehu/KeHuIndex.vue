@@ -21,28 +21,24 @@
             </a-form-item>
           </a-col>
              <a-col :md="6" :sm="8" :xs="24">
-            <a-form-item label="地址">
-              <a-input placeholder="请输入地址" v-model="queryParam.adress"></a-input>
+            <a-form-item label="客户名称">
+              <a-input placeholder="请输入客户名称" v-model="queryParam.name"></a-input>
             </a-form-item>
           </a-col>
-         
             <a-col :md="6" :sm="8" :xs="24">
-              <a-form-item label="楼号">
-                <a-input placeholder="请输入楼号" v-model="queryParam.building"></a-input>
+              <a-form-item label="行业">
+                <a-input placeholder="请输入行业" v-model="queryParam.business"></a-input>
               </a-form-item>
             </a-col>
-           
-           
-           
              <a-col :md="6" :sm="8" :xs="24">
               <a-form-item label="楼层">
                 <a-input placeholder="请输入楼层" v-model="queryParam.floor"></a-input>
               </a-form-item>
             </a-col>
             <a-col :md="6" :sm="8" :xs="24">
-              <a-form-item label="是否租出">
+              <a-form-item label="是否失效">
                 <!-- <a-input placeholder="请输入是否租出" v-model="queryParam.sold"></a-input> -->
-                <a-radio-group name="sold" @change="onChange" defaultValue="0" v-model="queryParam.sold">
+                <a-radio-group name="lose" @change="onChange" defaultValue="0" v-model="queryParam.lose">
                     <a-radio value="0">否</a-radio>
                     <a-radio value="1">是</a-radio>
                     
@@ -50,8 +46,8 @@
               </a-form-item>
             </a-col>
             <a-col :md="6" :sm="8" :xs="24">
-              <a-form-item label="电压">
-                <a-input placeholder="请输入电压" v-model="queryParam.voltage"></a-input>
+              <a-form-item label="位置">
+                <a-input placeholder="请输入位置" v-model="queryParam.site"></a-input>
               </a-form-item>
             </a-col>
             <a-col :md="6" :sm="8" :xs="24">
@@ -59,13 +55,7 @@
                 <a-input placeholder="请输入关键字" v-model="queryParam.keyWord"></a-input>
               </a-form-item>
             </a-col>
-             <!-- <a-col :md="12" :sm="16" :xs="24">
-              <a-form-item label="电压">
-                <a-input placeholder="请输入最小值" class="query-group-cust" v-model="queryParam.voltage_begin"></a-input>
-                <span class="query-group-split-cust"></span>
-                <a-input placeholder="请输入最大值" class="query-group-cust" v-model="queryParam.voltage_end"></a-input>
-              </a-form-item>
-            </a-col> -->
+
           </template>
           <a-col :md="8" :sm="12" :xs="24">
             <span style="float: left;overflow: hidden;" class="table-page-search-submitButtons">
@@ -138,16 +128,16 @@
                 </a-popconfirm>
               </a-menu-item>
               <a-menu-item>
-                <a-popconfirm title="确定修改租出状态吗?" @confirm="() => handleSold(record.id)">
-                  <a>已租出</a>
+                <a-popconfirm title="确定修改有效状态吗?" @confirm="() => handleLose(record.id)">
+                  <a>已失效</a>
                 </a-popconfirm>
               </a-menu-item>
             </a-menu>
           </a-dropdown>
         </span>
-        <template slot='sold' slot-scope="text">
-          <a-tag v-if='text=="1"' color="orange">已租</a-tag>
-          <a-tag v-if="text=='0'" color="green">未租</a-tag>
+        <template slot='lose' slot-scope="text">
+          <a-tag v-if='text=="1"' color="orange">无效</a-tag>
+          <a-tag v-if="text=='0'" color="green">有效</a-tag>
         </template>
         <template slot='jellipsis' slot-scope="text">
            <j-ellipsis :value="text" :length="20"></j-ellipsis>
@@ -155,18 +145,18 @@
       </a-table>
     </div>
 
-    <house-modal ref="modalForm" @ok="modalFormOk"></house-modal>
+   <customer-modal ref="modalForm" @ok="modalFormOk"></customer-modal>
 
 
  </a-card>
 </template>
 <script>
-import HouseModal from './modules/HouseModal'
+import CustomerModal from './modules/CustomerModal'
 import Excel from './Excel'
-import JEllipsis from './JEllipsis'
+import JEllipsis from "../utils/JEllipsis";
 export default {
       components: {
-      HouseModal,
+        CustomerModal,
       Excel,
       JEllipsis,
     },
@@ -227,25 +217,19 @@ export default {
             }
           },
           {
-            title:'编号',
+            title:'客户名称',
             align:"center",
-      
-            dataIndex: 'code'
-          },
-          {
-            title:'地址',
-            align:"center",
-            dataIndex: 'adress'
-          },
-          {
-            title:'房东',
-            align:"center",
-            dataIndex: 'landlord'
+            dataIndex: 'name'
           },
           {
             title:'电话',
             align:"center",
             dataIndex: 'tel'
+          },
+          {
+            title:'行业',
+            align:"center",
+            dataIndex: 'business'
           },
           {
             title:'面积最小',
@@ -275,12 +259,12 @@ export default {
         //     dataIndex: 'area_unit'
         //   },
           {
-            title:'栋数',
+            title:'位置',
             align:"center",
-            dataIndex: 'building'
+            dataIndex: 'site'
           },
           {
-            title:'层数',
+            title:'楼层',
             align:"center",
             dataIndex: 'floor'
           },
@@ -312,11 +296,7 @@ export default {
         //     align:"center",
         //     dataIndex: 'price_unit'
         //   },
-          {
-            title:'电压',
-            align:"center",
-            dataIndex: 'voltage'
-          },
+
           {
             title:'备注',
             align:"center",
@@ -329,11 +309,7 @@ export default {
             align:"center",
             dataIndex: 'source'
           },
-           {
-            title:'委托',
-            align:"center",
-            dataIndex: 'entrust'
-          },
+
           {
             title:'登记日期',
             align:"center",
@@ -343,15 +319,15 @@ export default {
             }
           },
           {
-            title:'是否租出',
+            title:'是否有效',
             align:"center",
-            dataIndex: 'sold',
-            scopedSlots:{customRender:'sold'}
+            dataIndex: 'lose',
+            scopedSlots:{customRender:'lose'}
           },
           {
-            title:'租出日期',
+            title:'失效日期',
             align:"center",
-            dataIndex: 'sell_time',
+            dataIndex: 'lose_time',
             customRender:function (text) {
               return !text?"":(text.length>10?text.substr(0,10):text)
             }
@@ -371,8 +347,9 @@ export default {
       }
     },
     created(){
-        this.loadData();
-        this.queryParam.sold = '0';
+
+      this.queryParam.lose = '0';
+      this.loadData();
     },
     
     methods: {
@@ -387,15 +364,15 @@ export default {
       this.loading = true;
       
 
-      let whereSQL = `WHERE 1=1 and sold='${searchParams.sold}' `;
-      // 地址模糊查询
-      searchParams.adress !== undefined ? whereSQL += ` and adress LIKE '%${searchParams.adress}%'` : null;
-      // 栋数模糊查询
-      searchParams.building !== undefined ? whereSQL += `  AND building LIKE '%${searchParams.building}%'` : null;
-      // 层数模糊查询
+      let whereSQL = `WHERE 1=1 and lose='${searchParams.lose}' `;
+      // 客户名称模糊查询
+      searchParams.name !== undefined ? whereSQL  += ` and name like '%${searchParams.name}%'` : null;
+      // 位置模糊查询
+      searchParams.site !== undefined ? whereSQL += ` and site LIKE '%${searchParams.site}%'` : null;
+      // 楼层模糊查询
       searchParams.floor !== undefined ? whereSQL += `  and floor like '%${searchParams.floor}%' ` : null;
-      // 电压模糊查询
-      searchParams.voltage !== undefined ? whereSQL += ` and voltage like '%${searchParams.voltage}%' ` : null;
+      // 行业模糊查询
+      searchParams.business !== undefined ? whereSQL += ` and business like '%${searchParams.business}%' ` : null;
      // 价格范围查询
       searchParams.price_begin !== undefined ? whereSQL += `AND (price_min >= ${searchParams.price_begin} 
         or (price_min <= ${searchParams.price_begin} and price_max >= ${searchParams.price_begin})) ` : null;
@@ -407,18 +384,18 @@ export default {
       searchParams.area_end !== undefined ? whereSQL += `AND (area_min <= ${searchParams.area_end} 
         or (area_max >= ${searchParams.area_end} and area_min <= ${searchParams.area_end}))` : null;
       // 关键字模糊查询
-      searchParams.keyWord !== undefined ? whereSQL += `and (code like '%${searchParams.keyWord}%' 
-        or adress like '%${searchParams.keyWord}%' or landlord like '%${searchParams.keyWord}%' 
-        or voltage like '%${searchParams.keyWord}%' or remark like '%${searchParams.keyWord}%' 
-        or source like '%${searchParams.keyWord}%' or entrust like '%${searchParams.keyWord}%')
+      searchParams.keyWord !== undefined ? whereSQL += `and (name like '%${searchParams.keyWord}%'
+        or site like '%${searchParams.keyWord}%' or business like '%${searchParams.keyWord}%'
+        or remark like '%${searchParams.keyWord}%'
+        or source like '%${searchParams.keyWord}%'
         or area_unit like '%${searchParams.keyWord}%' or price_unit like '%${searchParams.keyWord}%'` : null;
 
       const pageSQL = `LIMIT ${searchParams.pageSize} OFFSET ${(searchParams.pageNo - 1) * searchParams.pageSize} `;
       const orderSQL = `ORDER BY id ,${searchParams.column} `;
       // 导出sql
-      this.downloadExcelSQL = 'SELECT * from HOUSE ' + whereSQL + orderSQL;
+      this.downloadExcelSQL = 'SELECT * from CUSTOMER ' + whereSQL + orderSQL;
       const rowSQL = this.downloadExcelSQL + pageSQL;
-      const countSQL = 'SELECT COUNT(id) AS totalCount from HOUSE ' + whereSQL;
+      const countSQL = 'SELECT COUNT(id) AS totalCount from CUSTOMER ' + whereSQL;
       this.$db.all(rowSQL, (err, res) => {
         if (err) {
           this.$logger(err);
@@ -521,7 +498,7 @@ export default {
         this.queryParam.sold = e.target.value;
       },
     handleDelete: function (id) {
-      this.$db.run(`delete from HOUSE where id = ${id}`,err=>{
+      this.$db.run(`delete from CUSTOMER where id = ${id}`,err=>{
           if(err){
             this.$logger(err);
             this.$db.run('ROLLBACK');
@@ -533,8 +510,8 @@ export default {
           this.loadData();
       })
     },
-    handleSold: function(id){
-        this.$db.run(`update HOUSE set sold='1',sell_time = datetime('now') where id = ${id}`,err=>{
+    handleLose: function(id){
+        this.$db.run(`update CUSTOMER set lose='1',lose_time = datetime('now') where id = ${id}`,err=>{
             if(err){
                 this.$logger(err);
                 this.$Notice.error({

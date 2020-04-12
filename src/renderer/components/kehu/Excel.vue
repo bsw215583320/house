@@ -53,11 +53,12 @@ export default {
             var runSql;
             var vsql = dbUtils.getValidateSql(sd.编号);
             this.$db.all(vsql, (err, res) => {
+              console.log(res)
               if (res != undefined && res.length > 0) {
                 var id = res[0].id;
-                runSql = dbUtils.getUpdateHouseSql(id);
+                runSql = dbUtils.getUpdateCustomerSql(id);
               } else {
-                runSql = dbUtils.insertHouseSql;
+                runSql = dbUtils.insertCustomerSql;
               }
               this.$db.serialize(() => {
               this.$db.run("BEGIN");
@@ -66,22 +67,20 @@ export default {
                 "",
                 "",
                 sd.编号,
-                sd.地址,
-                sd.业主姓名,
-                sd.业主电话+"",
+                sd.客户姓名,
+                sd.行业,
+                sd.电话+"",
                 sd.面积最小,
                 sd.面积最大,
                 sd.面积单位,
-                sd.厂房栋数,
-                sd.厂房层数,
+                sd.位置,
+                sd.楼层,
                 sd.价格最低,
                 sd.价格最高,
-                sd.租金单位,
-                sd.配电,
+                sd.价格单位,
                 sd.备注,
                 sd.信息,
-                sd.委托,
-                dbUtils.getDateByStr(sd.登记日期),
+                dbUtils.getDateByStr(sd.日期),
                 '',
                 err => {
                     ++flag;

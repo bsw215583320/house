@@ -8,7 +8,7 @@ import store from './store'
 import db from './utils/db'
 import logger from './utils/logger'
 import 'ant-design-vue/dist/antd.less'
-import './components/zufang/util/filter'
+import './components/fangyuan/util/filter'
 
 
 if (!process.env.IS_WEB) Vue.use(require('vue-electron'))
