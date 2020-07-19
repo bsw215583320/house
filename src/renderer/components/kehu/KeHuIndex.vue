@@ -75,7 +75,7 @@
  <!-- 操作按钮区域 -->
     <div class="table-operator">
       <a-button @click="handleAdd" type="primary" icon="plus">新增</a-button>
-      <excel @ok="modalFormOk"></excel>
+      <excel @ok="modalFormOk" @loadStart="loadStart"></excel>
     </div>
 
     <!-- table区域-begin -->
@@ -132,6 +132,9 @@
                   <a>已失效</a>
                 </a-popconfirm>
               </a-menu-item>
+               <a-menu-item>
+                <a @click="matchHouses(record)">匹配房源</a>
+              </a-menu-item>
             </a-menu>
           </a-dropdown>
         </span>
@@ -146,7 +149,7 @@
     </div>
 
    <customer-modal ref="modalForm" @ok="modalFormOk"></customer-modal>
-
+<house-list-modal ref="houseListModal"></house-list-modal>
 
  </a-card>
 </template>
@@ -154,17 +157,22 @@
 import CustomerModal from './modules/CustomerModal'
 import Excel from './Excel'
 import JEllipsis from "../utils/JEllipsis";
+import { customerDbUtils } from "./dbUtils"
+import HouseListModal from "./modules/HouseListModal";
+
 export default {
       components: {
         CustomerModal,
       Excel,
       JEllipsis,
+        customerDbUtils,
+        HouseListModal,
     },
   data() {
     return {
      queryParam: {
 
-        sold:"0",
+        lose:"0",
          adress:'',
          building:'',
          floor:'',
@@ -175,8 +183,8 @@ export default {
       /* 分页参数 */
       ipagination:{
         current: 1,
-        pageSize: 10,
-        pageSizeOptions: ['10', '20', '30'],
+        pageSize: 5,
+        pageSizeOptions: ['5', '10', '20', '30'],
         showTotal: (total, range) => {
           return range[0] + "-" + range[1] + " 共" + total + "条"
         },
@@ -217,7 +225,14 @@ export default {
             }
           },
           {
+            title:'编号',
+            align:"center",
+            sorter:true,
+            dataIndex: 'code'
+          },
+          {
             title:'客户名称',
+            sorter:true,
             align:"center",
             dataIndex: 'name'
           },
@@ -228,15 +243,17 @@ export default {
           },
           {
             title:'行业',
+            sorter:true,
             align:"center",
             dataIndex: 'business'
           },
           {
             title:'面积最小',
+            sorter:true,
             align:"center",
             dataIndex: 'area_min',
          customRender:function (t,r,index) {
-           if(t!=null){ 
+           if(t!=null && t!=''){
             return t +' '+ (r.area_unit==null?"":r.area_unit);
            }
                
@@ -244,10 +261,11 @@ export default {
           },
           {
             title:'面积最大',
+            sorter:true,
             align:"center",
             dataIndex: 'area_max',
          customRender:function (t,r,index) {
-           if(t!=null){ 
+           if(t!=null && t!=''){
             return t +' '+ (r.area_unit==null?"":r.area_unit);
            }
                
@@ -260,20 +278,23 @@ export default {
         //   },
           {
             title:'位置',
+            sorter:true,
             align:"center",
             dataIndex: 'site'
           },
           {
             title:'楼层',
+            sorter:true,
             align:"center",
             dataIndex: 'floor'
           },
           {
             title:'最低价',
+            sorter:true,
             align:"center",
             dataIndex: 'price_min',
             customRender:function (t,r,index) {
-               if(t!=null){
+              if(t!=null && t!=''){
                 return t +' '+ (r.price_unit==null?"":r.price_unit);
               }
              }
@@ -281,10 +302,11 @@ export default {
           },
             {
             title:'最高价',
+              sorter:true,
             align:"center",
             dataIndex: 'price_max',
             customRender:function (t,r,index) {
-              if(t!=null){
+              if(t!=null && t!=''){
                 return t +' '+ (r.price_unit==null?"":r.price_unit);
               }
                
@@ -312,6 +334,7 @@ export default {
 
           {
             title:'登记日期',
+            sorter:true,
             align:"center",
             dataIndex: 'source_time',
             customRender:function (text) {
@@ -326,6 +349,7 @@ export default {
           },
           {
             title:'失效日期',
+            sorter:true,
             align:"center",
             dataIndex: 'lose_time',
             customRender:function (text) {
@@ -361,42 +385,9 @@ export default {
         this.ipagination.current = 1;
       }
       var searchParams = this.getQueryParams();//查询条件
+      console.log(searchParams)
       this.loading = true;
-      
-
-      let whereSQL = `WHERE 1=1 and lose='${searchParams.lose}' `;
-      // 客户名称模糊查询
-      searchParams.name !== undefined ? whereSQL  += ` and name like '%${searchParams.name}%'` : null;
-      // 位置模糊查询
-      searchParams.site !== undefined ? whereSQL += ` and site LIKE '%${searchParams.site}%'` : null;
-      // 楼层模糊查询
-      searchParams.floor !== undefined ? whereSQL += `  and floor like '%${searchParams.floor}%' ` : null;
-      // 行业模糊查询
-      searchParams.business !== undefined ? whereSQL += ` and business like '%${searchParams.business}%' ` : null;
-     // 价格范围查询
-      searchParams.price_begin !== undefined ? whereSQL += `AND (price_min >= ${searchParams.price_begin} 
-        or (price_min <= ${searchParams.price_begin} and price_max >= ${searchParams.price_begin})) ` : null;
-      searchParams.price_end !== undefined ? whereSQL += `AND (price_min <= ${searchParams.price_end} 
-        or (price_max >= ${searchParams.price_end} and price_min <= ${searchParams.price_end})) ` : null;
-      // 面积范围查询
-      searchParams.area_begin !== undefined ? whereSQL += `AND (area_min >= ${searchParams.area_begin} 
-        or (area_min <= ${searchParams.area_begin} and area_max >= ${searchParams.area_begin}))` : null;
-      searchParams.area_end !== undefined ? whereSQL += `AND (area_min <= ${searchParams.area_end} 
-        or (area_max >= ${searchParams.area_end} and area_min <= ${searchParams.area_end}))` : null;
-      // 关键字模糊查询
-      searchParams.keyWord !== undefined ? whereSQL += `and (name like '%${searchParams.keyWord}%'
-        or site like '%${searchParams.keyWord}%' or business like '%${searchParams.keyWord}%'
-        or remark like '%${searchParams.keyWord}%'
-        or source like '%${searchParams.keyWord}%'
-        or area_unit like '%${searchParams.keyWord}%' or price_unit like '%${searchParams.keyWord}%'` : null;
-
-      const pageSQL = `LIMIT ${searchParams.pageSize} OFFSET ${(searchParams.pageNo - 1) * searchParams.pageSize} `;
-      const orderSQL = `ORDER BY id ,${searchParams.column} `;
-      // 导出sql
-      this.downloadExcelSQL = 'SELECT * from CUSTOMER ' + whereSQL + orderSQL;
-      const rowSQL = this.downloadExcelSQL + pageSQL;
-      const countSQL = 'SELECT COUNT(id) AS totalCount from CUSTOMER ' + whereSQL;
-      this.$db.all(rowSQL, (err, res) => {
+      this.$db.all(customerDbUtils.getRowSql(searchParams), (err, res) => {
         if (err) {
           this.$logger(err);
           this.$Notice.error({
@@ -413,7 +404,7 @@ export default {
         }
         this.loading = false;
       });
-      this.$db.get(countSQL, (err, res) => {
+      this.$db.get(customerDbUtils.getCountSql(searchParams), (err, res) => {
         if (err) {
           this.$logger(err);
           this.$Notice.error({
@@ -495,10 +486,11 @@ export default {
       this.loadData(1);
     },
    onChange(e) {
-        this.queryParam.sold = e.target.value;
+      console.log(e)
+        this.queryParam.lose = e.target.value;
       },
     handleDelete: function (id) {
-      this.$db.run(`delete from CUSTOMER where id = ${id}`,err=>{
+      this.$db.run(customerDbUtils.getDelSql(id),err=>{
           if(err){
             this.$logger(err);
             this.$db.run('ROLLBACK');
@@ -511,7 +503,7 @@ export default {
       })
     },
     handleLose: function(id){
-        this.$db.run(`update CUSTOMER set lose='1',lose_time = datetime('now') where id = ${id}`,err=>{
+        this.$db.run(customerDbUtils.getLoseSql(id),err=>{
             if(err){
                 this.$logger(err);
                 this.$Notice.error({
@@ -554,90 +546,17 @@ export default {
       this.$refs.modalForm.title="详情";
       this.$refs.modalForm.disableSubmit = true;
     },
-
+      matchHouses: function (record) {
+        this.$refs.houseListModal.visible = true;
+        this.$refs.houseListModal.loadData(record);
+      },
+      loadStart: function(){
+        this.loading = true
+      }
    
   }
 };
 </script>
 <style>
-
-.ant-row {
-    margin: 10px !important;
-}
-.ant-advanced-search-form {
-  padding: 24px;
-  background: #fbfbfb;
-  border: 1px solid #d9d9d9;
-  border-radius: 6px;
-}
-
-.ant-advanced-search-form .ant-form-item {
-  display: flex;
-}
-
-.ant-advanced-search-form .ant-form-item-control-wrapper {
-  flex: 1;
-}
-
-#components-form-demo-advanced-search .ant-form {
-  max-width: none;
-}
-#components-form-demo-advanced-search .search-result-list {
-  margin-top: 16px;
-  border: 1px dashed #e9e9e9;
-  border-radius: 6px;
-  background-color: #fafafa;
-  min-height: 200px;
-  text-align: center;
-  padding-top: 80px;
-}
-
-  
-/*列表上方操作按钮区域*/
-.ant-card-body .table-operator {
-  margin-bottom: 18px;
-}
-/** Button按钮间距 */
-.table-operator .ant-btn {
-  margin-right: 6px
-}
-/*列表td的padding设置 可以控制列表大小*/
-.ant-table-tbody .ant-table-row td {
-  padding-top: 15px;
-  padding-bottom: 15px;
-}
-
-/*列表页面弹出modal*/
-.ant-modal-cust-warp {
-  height: 100%
-}
-
-/*弹出modal Y轴滚动条*/
-.ant-modal-cust-warp .ant-modal-body {
-  height: calc(100% - 110px) !important;
-  overflow-y: auto
-}
-
-/*弹出modal 先有content后有body 故滚动条控制在body上*/
-.ant-modal-cust-warp .ant-modal-content {
-  height: 90% !important;
-  overflow-y: hidden
-}
-/*列表中有图片的加这个样式 参考用户管理*/
-.anty-img-wrap {
-  height: 25px;
-  position: relative;
-}
-.anty-img-wrap > img {
-  max-height: 100%;
-}
-/*列表中范围查询样式*/
-.query-group-cust{width: calc(50% - 10px) !important;}
-.query-group-split-cust:before{content:"~";width: 20px;display: inline-block;text-align: center}
-
-.ant-btn{
-    margin-top:15px;
-}
-
-
+  @import "../../assets/less/common.less";
 </style>

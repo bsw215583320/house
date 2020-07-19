@@ -36,7 +36,7 @@
           </a-form-item>
         </a-form-item>
         <a-form-item label="位置" :labelCol="labelCol" :wrapperCol="wrapperCol">
-          <a-input v-decorator="[ 'site', validatorRules.site]" placeholder="请输入位置"></a-input>
+          <a-input v-decorator="[ 'site', validatorRules.site]" placeholder="请输入位置，多个位置以“+”号分隔"></a-input>
         </a-form-item>
         <a-form-item label="楼层" :labelCol="labelCol" :wrapperCol="wrapperCol">
           <a-input v-decorator="[ 'floor', validatorRules.floor]" placeholder="请输入楼层"></a-input>
@@ -71,7 +71,7 @@
 
   import fse from 'fs-extra'
   import pick from 'lodash.pick'
-  import {dbUtils} from '../dbUtils'
+  import {customerDbUtils} from '../dbUtils'
   import {cfgPath} from "../../../utils/settings";
   import {getDateByStr,dateToString} from "../../fangyuan/util/DateUtil"
 
@@ -79,7 +79,7 @@
     name: "CustomerModal",
     components: {
       pick,
-      dbUtils,
+      customerDbUtils,
       cfgPath,
       getDateByStr,dateToString
     },
@@ -102,6 +102,11 @@
         },
         confirmLoading: false,
         validatorRules: {
+          code: {rules: [
+              {required: true, message: '请输入编号!'},
+              {validator:this.validateInputCode}
+
+            ]},
           name: {rules: [
             {required: true, message: '请输入客户名称!'},
           ]},
@@ -154,7 +159,7 @@
         this.model = Object.assign({}, record);
         this.visible = true;
         this.$nextTick(() => {
-          this.form.setFieldsValue(pick(this.model,'code','name','tel','business','areaMin','areaMax','areaUnit','site','floor','priceMin','priceMax','priceUnit','remark','source','sourceDate'))
+          this.form.setFieldsValue(pick(this.model,'code','name','tel','business','area_min','area_max','area_unit','site','floor','price_min','price_max','price_unit','remark','source','source_date'))
         })
       },
       close () {
@@ -169,9 +174,9 @@
             that.confirmLoading = true;
             var runSql;
             if(!this.model.id){
-              runSql = dbUtils.insertCustomerSql;
+              runSql = customerDbUtils.insertCustomerSql;
             }else{
-              runSql = dbUtils.getUpdateCustomerSql(this.model.id);
+              runSql = customerDbUtils.getUpdateCustomerSql(this.model.id);
             }
             let formData = Object.assign(this.model, values);
             console.log("表单提交数据",formData)
@@ -202,9 +207,20 @@
         this.close()
       },
       popupCallback(row){
-        this.form.setFieldsValue(pick(row,'code','name','tel','business','areaMin','areaMax','areaUnit','site','floor','priceMin','priceMax','priceUnit','remark','source','sourceDate'))
+        this.form.setFieldsValue(pick(row,'code','name','tel','business','area_min','area_max','area_unit','site','floor','price_min','price_max','price_unit','remark','source','source_date'))
       },
+      validateInputCode(rule, value, callback) {
+        this.$db.all(customerDbUtils.getValidateSql(value), (err, res) => {
+          console.log(err)
+          console.log(res)
 
+          console.log(this.model.id)
+          if (res != undefined && res.length > 0 && !this.model.id) {
+            callback("编码重复！")
+          }
+          callback();
+        })
+      }
       
     }
   }

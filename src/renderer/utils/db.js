@@ -56,6 +56,7 @@ db.serialize(() => {
     area_max DECIMAL(15,2) ,
     area_unit varchar(32) ,
     building varchar(32)  ,
+    
     floor varchar(32),
     price_min DECIMAL(15,2),
     price_max DECIMAL(15,2),

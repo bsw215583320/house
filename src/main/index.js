@@ -23,7 +23,7 @@ function createWindow () {
    */
   mainWindow = new BrowserWindow({
     icon: '../../build/icons/house.png',
-    height: 563,
+    height: 600,
     useContentSize: true,
     width: 1000,
     webPreferences:{
@@ -44,7 +44,7 @@ function createWindow () {
 app.on('ready',
 function(){
   const menu = Menu.buildFromTemplate(template);
-  Menu.setApplicationMenu(menu)
+ // Menu.setApplicationMenu(menu)
   createWindow()
 }
 )

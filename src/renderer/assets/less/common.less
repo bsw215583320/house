@@ -1,12 +1,48 @@
+.ant-row {
+  margin: 10px !important;
+}
+
+.ant-advanced-search-form {
+  padding: 24px;
+  background: #fbfbfb;
+  border: 1px solid #d9d9d9;
+  border-radius: 6px;
+}
+
+.ant-advanced-search-form .ant-form-item {
+  display: flex;
+}
+
+.ant-advanced-search-form .ant-form-item-control-wrapper {
+  flex: 1;
+}
+
+#components-form-demo-advanced-search .ant-form {
+  max-width: none;
+}
+
+#components-form-demo-advanced-search .search-result-list {
+  margin-top: 16px;
+  border: 1px dashed #e9e9e9;
+  border-radius: 6px;
+  background-color: #fafafa;
+  min-height: 200px;
+  text-align: center;
+  padding-top: 80px;
+}
+
 
 /*列表上方操作按钮区域*/
 .ant-card-body .table-operator {
   margin-bottom: 18px;
 }
+
 /** Button按钮间距 */
 .table-operator .ant-btn {
+  margin-top: 15px;
   margin-right: 6px
 }
+
 /*列表td的padding设置 可以控制列表大小*/
 .ant-table-tbody .ant-table-row td {
   padding-top: 15px;
@@ -29,20 +65,29 @@
   height: 90% !important;
   overflow-y: hidden
 }
+
 /*列表中有图片的加这个样式 参考用户管理*/
 .anty-img-wrap {
   height: 25px;
   position: relative;
 }
+
 .anty-img-wrap > img {
   max-height: 100%;
 }
+
 /*列表中范围查询样式*/
-.query-group-cust{width: calc(50% - 10px)}
-.query-group-split-cust:before{content:"~";width: 20px;display: inline-block;text-align: center}
+.query-group-cust {
+  width: calc(50% - 10px) !important;
+}
 
-
-/*erp风格子表外框padding设置*/
-.ant-card-wider-padding.cust-erp-sub-tab>.ant-card-body{padding:5px 12px}
-
+.query-group-split-cust:before {
+  content: "~";
+  width: 20px;
+  display: inline-block;
+  text-align: center
+}
+.table-page-search-submitButtons {
+  margin-top: 13px;
+}
 

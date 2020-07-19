@@ -86,7 +86,7 @@
 
   import fse from 'fs-extra'
   import pick from 'lodash.pick'
-  import {dbUtils} from '../dbUtils'
+  import {houseDbUtils} from '../dbUtils'
   import {cfgPath} from "../../../utils/settings";
   import {getDateByStr,dateToString} from"../util/DateUtil"
 
@@ -94,7 +94,7 @@
     name: "HouseModal",
     components: { 
       pick,
-      dbUtils,
+      houseDbUtils,
       cfgPath,
       getDateByStr,
       dateToString,
@@ -187,9 +187,9 @@
             that.confirmLoading = true;
            var runSql;
             if(!this.model.id){
-              runSql = dbUtils.insertHouseSql;
+              runSql = houseDbUtils.insertHouseSql;
             }else{
-              runSql = dbUtils.getUpdateHouseSql(this.model.id);
+              runSql = houseDbUtils.getUpdateHouseSql(this.model.id);
             }
             let formData = Object.assign(this.model, values);
             console.log("表单提交数据",formData)
@@ -224,7 +224,7 @@
         this.form.setFieldsValue(pick(row,'code','adress','landlord','tel','area_min','area_max','areaUnit','building','floor','price_min','price_max','priceUnit','voltage','remark','source','entrust','sourceTime','sold','sellTime'))
       },
        validateInputCode(rule, value, callback) {
-         this.$db.all(dbUtils.getValidateSql(value),(err,res)=>{
+         this.$db.all(houseDbUtils.getValidateSql(value),(err,res)=>{
             console.log(err)
             console.log(res)
 

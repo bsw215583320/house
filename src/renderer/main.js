@@ -11,6 +11,7 @@ import 'ant-design-vue/dist/antd.less'
 import './components/fangyuan/util/filter'
 
 
+
 if (!process.env.IS_WEB) Vue.use(require('vue-electron'))
 Vue.http = Vue.prototype.$http = axios
 Vue.config.productionTip = false

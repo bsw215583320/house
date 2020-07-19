@@ -14,11 +14,13 @@
 
 <script>
 import XLSX from "xlsx";
-import { dbUtils } from "./dbUtils";
+import { houseDbUtils } from "./dbUtils";
+import { getDateByStr } from "./util/DateUtil";
+
 export default {
   name: "Excel",
   components: {
-    dbUtils
+    houseDbUtils
   },
   data() {
     return {
@@ -29,6 +31,7 @@ export default {
     beforeUpload(file) {
       //  console.log(file)
       let that = this;
+      this.$emit('loadStart')
       const files = file;
       if (files.lenght < 1) {
         return false;
@@ -51,14 +54,13 @@ export default {
              
             let sd = ws[i]; // 对数据自行操作
             var runSql;
-            var vsql = dbUtils.getValidateSql(sd.编号);
+            var vsql = houseDbUtils.getValidateSql(sd.编号);
             this.$db.all(vsql, (err, res) => {
-              console.log(res)
               if (res != undefined && res.length > 0) {
                 var id = res[0].id;
-                runSql = dbUtils.getUpdateHouseSql(id);
+                runSql = houseDbUtils.getUpdateHouseSql(id);
               } else {
-                runSql = dbUtils.insertHouseSql;
+                runSql = houseDbUtils.insertHouseSql;
               }
               this.$db.serialize(() => {
               this.$db.run("BEGIN");
@@ -82,11 +84,12 @@ export default {
                 sd.备注,
                 sd.信息,
                 sd.委托,
-                dbUtils.getDateByStr(sd.登记日期),
+                getDateByStr(sd.登记日期+""),
                 '',
                 err => {
                     ++flag;
                     if(flag>=ws.length){
+                      this.loading = false;
                          this.$emit('ok')
                     }
                   if (err) {

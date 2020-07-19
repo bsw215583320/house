@@ -231,7 +231,7 @@
     }
   }
 </script>
-<style>
+<style scoped>
 
   .ant-row {
     margin: 10px !important;
@@ -307,8 +307,6 @@
   .query-group-cust{width: calc(50% - 10px) !important;}
   .query-group-split-cust:before{content:"~";width: 20px;display: inline-block;text-align: center}
 
-  .ant-btn{
-    margin-top:15px;
-  }
+
 
 </style>
