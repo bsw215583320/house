@@ -77,7 +77,9 @@ var houseDbUtils = {
 
     // 匹配房源条件组合
     getMatchWhereSql(searchParams) {
-        let whereSQL = `WHERE 1=1 and sold='${searchParams.sold}' `;
+        let whereSQL = `WHERE 1=1 `
+
+        searchParams.sold !== undefined &&searchParams.sold != '' ? whereSQL+= ` and sold='${searchParams.sold}' `: null;
         // 地址模糊查询
         searchParams.adress !== undefined &&searchParams.adress != '' ? whereSQL += ` and adress LIKE '%${searchParams.adress}%'` : null;
         // 栋数模糊查询

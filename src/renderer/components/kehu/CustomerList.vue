@@ -173,21 +173,7 @@
             align:"center",
             dataIndex: 'floor'
           },
-          {
-            title:'价格最低',
-            align:"center",
-            dataIndex: 'priceMin'
-          },
-          {
-            title:'价格最高',
-            align:"center",
-            dataIndex: 'priceMax'
-          },
-          {
-            title:'价格单位',
-            align:"center",
-            dataIndex: 'priceUnit'
-          },
+
           {
             title:'备注',
             align:"center",

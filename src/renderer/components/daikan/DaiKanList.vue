@@ -6,7 +6,11 @@
           :fullscreen.sync=fullscreen
           :switch-fullscreen=switchFullscreen>
 
+    <!-- 操作按钮区域 -->
+    <div class="table-operator">
+      <a-button @click="handleAdd()" type="primary" icon="plus">新增</a-button>
 
+    </div>
     <!-- table区域-begin -->
     <div>
 
@@ -80,24 +84,27 @@
         </template>
       </a-table>
     </div>
-
+    <dai-kan-modal ref="modalForm" @ok="modalFormOk"></dai-kan-modal>
   </my-modal>
 </template>
 
 <script>
-  import JEllipsis from "../../utils/JEllipsis";
-  import { houseDbUtils } from "../../fangyuan/dbUtils"
-  import MyModal from "../../common/myModal/index";
-  import { similar,findSubStr,matchRate,matchSite } from "../../fangyuan/util/StringUtil"
+  import JEllipsis from "../utils/JEllipsis";
+  import { houseDbUtils } from "../fangyuan/dbUtils"
+  import MyModal from "../common/myModal/index";
+  import { similar,findSubStr,matchRate,matchSite } from "../fangyuan/util/StringUtil"
+  import {customerDbUtils} from "../kehu/dbUtils";
+  import {takeLookDbUtils} from "./dbUtils";
+  import DaiKanModal from "./modules/DaiKanModal";
   export default {
-    name: 'HouseListModal',
+    name: 'DaiKanList',
     props:{
 
     },
-    components: {MyModal,JEllipsis,houseDbUtils,similar,findSubStr,matchRate,matchSite},
+    components: {MyModal,JEllipsis,houseDbUtils,similar,findSubStr,matchRate,matchSite,takeLookDbUtils,DaiKanModal},
     data() {
       return {
-        title:"房源匹配结果",
+        title:"带看记录",
         fullscreen:true,
         visible: false,
         switchFullscreen:true,
@@ -118,6 +125,7 @@
         /* table加载状态 */
         loading:false,
         searchParams:[],
+        customer_id:"",
         // 表头
         columns: [
           {
@@ -131,116 +139,37 @@
               return parseInt(index) + 1;
             }
           },
-          {
+      /*    {
             title: '编号',
             align: "center",
             sorter: true,
             dataIndex: 'code'
+          },*/
+          {
+            title: '房源编号',
+            align: "center",
+            sorter: true,
+            dataIndex: 'house_code'
           },
           {
-            title: '地址',
+            title: '带看时间',
             align: "center",
-            dataIndex: 'adress'
-          },
-          {
-            title: '房东',
-            align: "center",
-            dataIndex: 'landlord'
-          },
-          {
-            title: '电话',
-            align: "center",
-            dataIndex: 'tel'
-          },
-          {
-            title: '面积最小',
-            align: "center",
-            sorter:true,
-            dataIndex: 'area_min',
-            customRender: function (t, r, index) {
-              if (t != null) {
-                return t + ' ' + (r.area_unit == null ? "" : r.area_unit);
-              }
-
+            dataIndex: 'take_time',
+            customRender: function (text) {
+              return !text ? "" : (text.length > 10 ? text.substr(0, 10) : text)
             }
           },
           {
-            title: '面积最大',
+            title: '评价',
             align: "center",
-            sorter:true,
-            dataIndex: 'area_max',
-            customRender: function (t, r, index) {
-              if (t != null) {
-                return t + ' ' + (r.area_unit == null ? "" : r.area_unit);
-              }
+            dataIndex: 'evaluate'
+          },
+          {
+            title: '要求',
+            align: "center",
+            dataIndex: 'request'
+          },
 
-            }
-          },
-          //   {
-          //     title:'面积单位',
-          //     align:"center",
-          //     dataIndex: 'area_unit'
-          //   },
-          {
-            title:'匹配度',
-            align:"center",
-            dataIndex: 'level',
-            scopedSlots:{customRender:'level'},
-            /* customRender:function (t,r,index) {
-               if(t!=null){
-                 return t == '1'? '非常高' : '高' ;
-               }
-
-             }*/
-          },
-          {
-            title: '栋数',
-            sorter:true,
-            align: "center",
-            dataIndex: 'building'
-          },
-          {
-            title: '层数',
-            sorter:true,
-            align: "center",
-            dataIndex: 'floor'
-          },
-          {
-            title: '最低价',
-            sorter:true,
-            align: "center",
-            dataIndex: 'price_min',
-            customRender: function (t, r, index) {
-              if (t != null) {
-                return t + ' ' + (r.price_unit == null ? "" : r.price_unit);
-              }
-            }
-
-          },
-          {
-            title: '最高价',
-            sorter:true,
-            align: "center",
-            dataIndex: 'price_max',
-            customRender: function (t, r, index) {
-              if (t != null) {
-                return t + ' ' + (r.price_unit == null ? "" : r.price_unit);
-              }
-
-            }
-
-          },
-          //   {
-          //     title:'价格单位',
-          //     align:"center",
-          //     dataIndex: 'price_unit'
-          //   },
-          {
-            title: '电压',
-            sorter:true,
-            align: "center",
-            dataIndex: 'voltage'
-          },
           {
             title: '备注',
             align: "center",
@@ -248,68 +177,25 @@
             scopedSlots: {customRender: 'jellipsis'},
 
           },
-          {
-            title: '信息来源',
-            align: "center",
-            dataIndex: 'source'
-          },
-          {
-            title: '委托',
-            align: "center",
-            dataIndex: 'entrust'
-          },
-          {
-            title: '登记日期',
-            sorter:true,
-            align: "center",
-            dataIndex: 'source_time',
-            customRender: function (text) {
-              return !text ? "" : (text.length > 10 ? text.substr(0, 10) : text)
-            }
-          },
-          {
-            title: '是否租出',
-            align: "center",
-            dataIndex: 'sold',
-            scopedSlots: {customRender: 'sold'}
-          },
-          {
-            title: '租出日期',
-            align: "center",
-            sorter:true,
-            dataIndex: 'sell_time',
-            customRender: function (text) {
-              return !text ? "" : (text.length > 10 ? text.substr(0, 10) : text)
-            }
-          },
 
         ],
-        tableScroll:{x :13*147+50},
+        tableScroll:{x :7*147+50},
       }
     },
-
-    computed: {
-
-    },
-    watch: {
-
-    },
-    created(){
-
-    },
+    computed: {   },
+    watch: {   },
+    created(){   },
     methods: {
       loadData(arg) {
         this.model = arg;
         this.loading = true;
         let searchParams = {
 
-          'area_begin':arg.area_min,
-          'area_end':arg.area_max,
-          'price_begin':arg.price_min,
-          'price_end':arg.price_max,
+          'customer_id':arg.id,
           'pageNo':this.ipagination.current,
           'pageSize':this.ipagination.pageSize};
-        var sql = houseDbUtils.getMatchSql(searchParams,'2');
+        this.customer_id = arg.id;
+        var sql = takeLookDbUtils.getRowSql(searchParams);
         console.log(sql)
         this.$db.all(sql, (err, res) => {
           if (err) {
@@ -319,17 +205,13 @@
               desc: err,
             });
           } else {
-            res.forEach(function (item,index){
-             /* let rate = matchRate(item.adress.length>arg.site.length?arg.site.length:item.adress.length)
-              if(findSubStr(item.adress,arg.site)>=rate){
-                item.level = '1'
-              }*/
-             if(matchSite(item.adress,arg.site)){
-               item.level = '1'
-             }
-            })
-            res.sort(sortNumber)
-            this.dataSource = res;
+
+            if (!res.length && searchParams.pageNo !== 1) {
+              // 该页没数据，又不是第一页，就往上一页翻
+              this.loadData(1);
+            } else {
+              this.dataSource = res;
+            }
           }
           this.loading = false;
         });
@@ -345,6 +227,47 @@
         this.ipagination = pagination;
         this.loadData(this.model);
       },
+      onChange(e) {
+        console.log(e)
+        this.queryParam.lose = e.target.value;
+      },
+      handleDelete: function (id) {
+        this.$db.run(customerDbUtils.getDelSql(id),err=>{
+          if(err){
+            this.$logger(err);
+            this.$db.run('ROLLBACK');
+            this.$Notice.error({
+              title: '删除失败',
+              desc: err,
+            });
+          }
+          this.loadData();
+        })
+      },
+
+      handleEdit: function (record) {
+        this.$refs.modalForm.edit(record);
+        this.$refs.modalForm.title = "编辑";
+        this.$refs.modalForm.disableSubmit = false;
+      },
+      handleAdd: function () {
+        this.$refs.modalForm.add(this.customer_id);
+        this.$refs.modalForm.title = "新增";
+        this.$refs.modalForm.disableSubmit = false;
+      },
+
+      modalFormOk() {
+        // 新增/修改 成功时，重载列表
+        this.loadData(this.model);
+      },
+      handleDetail:function(record){
+        this.$refs.modalForm.edit(record);
+        this.$refs.modalForm.title="详情";
+        this.$refs.modalForm.disableSubmit = true;
+      },
+      loadStart: function(){
+        this.loading = true
+      },
     }
   }
   function sortNumber(a,b) {
@@ -354,4 +277,7 @@
 
 <style >
 
+  .table-operator {
+    margin-bottom: 18px;
+  }
 </style>

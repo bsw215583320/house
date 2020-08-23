@@ -41,26 +41,11 @@
         <a-form-item label="楼层" :labelCol="labelCol" :wrapperCol="wrapperCol">
           <a-input v-decorator="[ 'floor', validatorRules.floor]" placeholder="请输入楼层"></a-input>
         </a-form-item>
-        <a-form-item label="价格" :labelCol="labelCol" :wrapperCol="wrapperCol">
-          <a-form-item class="price_min_width">
-            <a-input v-decorator="['price_min',validatorRules.price_min]" placeholder="请输入最低价格" >
-            </a-input>
-          </a-form-item>
-          <span class="query-group-split-cust"></span>
-          <a-form-item class="price_max_width">
-            <a-input v-decorator="[ 'price_max',validatorRules.price_min]" placeholder="请输入最高价格"  >
-              <a-select slot="addonAfter" v-decorator="[ 'price_unit',{'initialValue':'元'}]"  style="width: 80px">
-                <a-select-option v-for="(punit,i) in priceUnits" :value="punit" :key="i">{{punit}}</a-select-option>
-              </a-select>
-            </a-input>
-          </a-form-item>
-        </a-form-item>
+
         <a-form-item label="备注" :labelCol="labelCol" :wrapperCol="wrapperCol">
           <a-input v-decorator="[ 'remark', validatorRules.remark]" placeholder="请输入备注"></a-input>
         </a-form-item>
-        <a-form-item label="客户来源" :labelCol="labelCol" :wrapperCol="wrapperCol">
-          <a-input v-decorator="[ 'source', validatorRules.source]" placeholder="请输入客户来源"></a-input>
-        </a-form-item>
+
 
       </a-form>
     </a-spin>
@@ -108,7 +93,7 @@
 
             ]},
           name: {rules: [
-            {required: true, message: '请输入客户名称!'},
+            { message: '请输入客户名称!'},
           ]},
           tel: {rules: [
             {required: true, message: '请输入电话!'},

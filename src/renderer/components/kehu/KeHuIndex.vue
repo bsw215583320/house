@@ -4,15 +4,9 @@
     <a-form class="ant-advanced-search-form" @keyup.enter.native="searchQuery">
       <a-row :gutter="24">
        
-        <a-col :md="12" :sm="16" :xs="24">
-              <a-form-item label="价格">
-                <a-input placeholder="请输入最小值" class="query-group-cust" v-model="queryParam.price_begin"></a-input>
-                <span class="query-group-split-cust"></span>
-                <a-input placeholder="请输入最大值" class="query-group-cust" v-model="queryParam.price_end"></a-input>
-              </a-form-item>
-            </a-col>
+
          
-          <template v-if="toggleSearchStatus">
+
                <a-col :md="12" :sm="16" :xs="24">
             <a-form-item label="面积">
               <a-input placeholder="请输入最小值" class="query-group-cust" v-model="queryParam.area_begin"></a-input>
@@ -20,6 +14,7 @@
               <a-input placeholder="请输入最大值" class="query-group-cust" v-model="queryParam.area_end"></a-input>
             </a-form-item>
           </a-col>
+        <template v-if="toggleSearchStatus">
              <a-col :md="6" :sm="8" :xs="24">
             <a-form-item label="客户名称">
               <a-input placeholder="请输入客户名称" v-model="queryParam.name"></a-input>
@@ -135,6 +130,13 @@
                <a-menu-item>
                 <a @click="matchHouses(record)">匹配房源</a>
               </a-menu-item>
+              <a-menu-item>
+                <a @click="addReception(record)">添加带看</a>
+              </a-menu-item>
+               <a-menu-item>
+                <a @click="receptionRecord(record)">带看记录</a>
+              </a-menu-item>
+
             </a-menu>
           </a-dropdown>
         </span>
@@ -150,6 +152,9 @@
 
    <customer-modal ref="modalForm" @ok="modalFormOk"></customer-modal>
 <house-list-modal ref="houseListModal"></house-list-modal>
+   <dai-kan-list ref="daikanList" ></dai-kan-list>
+
+   <dai-kan-modal ref="daikanModel" @ok="modalFormOk"></dai-kan-modal>
 
  </a-card>
 </template>
@@ -159,6 +164,8 @@ import Excel from './Excel'
 import JEllipsis from "../utils/JEllipsis";
 import { customerDbUtils } from "./dbUtils"
 import HouseListModal from "./modules/HouseListModal";
+import DaiKanList from "../daikan/DaiKanList";
+import DaiKanModal from "../daikan/modules/DaiKanModal";
 
 export default {
       components: {
@@ -167,6 +174,8 @@ export default {
       JEllipsis,
         customerDbUtils,
         HouseListModal,
+        DaiKanList,
+        DaiKanModal
     },
   data() {
     return {
@@ -288,36 +297,6 @@ export default {
             align:"center",
             dataIndex: 'floor'
           },
-          {
-            title:'最低价',
-            sorter:true,
-            align:"center",
-            dataIndex: 'price_min',
-            customRender:function (t,r,index) {
-              if(t!=null && t!=''){
-                return t +' '+ (r.price_unit==null?"":r.price_unit);
-              }
-             }
-          
-          },
-            {
-            title:'最高价',
-              sorter:true,
-            align:"center",
-            dataIndex: 'price_max',
-            customRender:function (t,r,index) {
-              if(t!=null && t!=''){
-                return t +' '+ (r.price_unit==null?"":r.price_unit);
-              }
-               
-             }
-          
-          },
-        //   {
-        //     title:'价格单位',
-        //     align:"center",
-        //     dataIndex: 'price_unit'
-        //   },
 
           {
             title:'备注',
@@ -552,8 +531,18 @@ export default {
       },
       loadStart: function(){
         this.loading = true
+      },
+      receptionRecord : function (record) {
+        this.$refs.daikanList.visible=true;
+        this.$refs.daikanList.loadData(record);
+
+      },
+      addReception : function (record) {
+        this.$refs.daikanModel.add(record.id);
+        this.$refs.daikanModel.title = "新增";
+        this.$refs.daikanModel.disableSubmit = false;
+
       }
-   
   }
 };
 </script>

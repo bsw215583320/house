@@ -1,6 +1,6 @@
 {
   "name": "house",
-  "version": "1.0.4",
+  "version": "2.0.1",
   "author": "baoshiwei <baoshiwei@shlanbao.cn>",
   "description": "An electron-vue project",
   "main": "./dist/electron/main.js",
@@ -13,7 +13,7 @@
     "pack": "npm run pack:main && npm run pack:renderer",
     "pack:main": "cross-env NODE_ENV=production webpack --progress --colors --config .electron-vue/webpack.main.config.js",
     "pack:renderer": "cross-env NODE_ENV=production webpack --progress --colors --config .electron-vue/webpack.renderer.config.js",
-    "postinstall": ""
+    "postinstall": "install-app-deps"
   },
   "build": {
     "productName": "house",
