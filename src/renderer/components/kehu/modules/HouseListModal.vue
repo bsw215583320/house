@@ -298,15 +298,23 @@
 
     },
     methods: {
-      loadData(arg) {
+      loadData(arg,lose) {
+        console.log('arg',arg)
+        console.log('lose',lose)
         this.model = arg;
         this.loading = true;
-        let searchParams = {
+        var floor = '';
+        if (arg.floor.indexOf('1')!=-1){
 
+          floor = '1';
+        }
+        let searchParams = {
+          'sold':lose,
           'area_begin':arg.area_min,
           'area_end':arg.area_max,
           'price_begin':arg.price_min,
           'price_end':arg.price_max,
+          'floor':floor,
           'pageNo':this.ipagination.current,
           'pageSize':this.ipagination.pageSize};
         var sql = houseDbUtils.getMatchSql(searchParams,'2');

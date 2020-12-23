@@ -128,7 +128,10 @@
                 </a-popconfirm>
               </a-menu-item>
                <a-menu-item>
-                <a @click="matchHouses(record)">匹配房源</a>
+                <a @click="matchHouses(record , '0')">匹配未租房源</a>
+              </a-menu-item>
+                 <a-menu-item>
+                <a @click="matchHouses(record , '1')">匹配已租房源</a>
               </a-menu-item>
               <a-menu-item>
                 <a @click="addReception(record)">添加带看</a>
@@ -525,9 +528,9 @@ export default {
       this.$refs.modalForm.title="详情";
       this.$refs.modalForm.disableSubmit = true;
     },
-      matchHouses: function (record) {
+      matchHouses: function (record,lose) {
         this.$refs.houseListModal.visible = true;
-        this.$refs.houseListModal.loadData(record);
+        this.$refs.houseListModal.loadData(record,lose);
       },
       loadStart: function(){
         this.loading = true
