@@ -328,13 +328,19 @@
             });
           } else {
             res.forEach(function (item,index){
+              console.log('item',item);
              /* let rate = matchRate(item.adress.length>arg.site.length?arg.site.length:item.adress.length)
               if(findSubStr(item.adress,arg.site)>=rate){
                 item.level = '1'
               }*/
-             if(matchSite(item.adress,arg.site)){
-               item.level = '1'
+             if(item.adress==undefined || item.adress == ''){
+               alert("编号为："+item.code+"的房源地址为空，请录入后重新匹配！");
+             }else{
+               if(matchSite(item.adress,arg.site)){
+                 item.level = '1'
+               }
              }
+
             })
             res.sort(sortNumber)
             this.dataSource = res;

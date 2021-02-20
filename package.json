@@ -1,6 +1,6 @@
 {
   "name": "house",
-  "version": "2.0.1",
+  "version": "2.0.2",
   "author": "baoshiwei <baoshiwei@shlanbao.cn>",
   "description": "An electron-vue project",
   "main": "./dist/electron/main.js",
